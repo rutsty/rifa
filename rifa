@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteo 400 Números</title>
+    <style>
+        body {
+            background-color: #1a1a24;
+            color: #ffb3ff;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #ff3399;
+            text-shadow: 2px 2px 0px #4d004d;
+        }
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 5px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .numero {
+            background-color: #330033;
+            border: 1px solid #ff3399;
+            color: #ffb3ff;
+            padding: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .numero:hover {
+            background-color: #ff3399;
+            color: white;
+            box-shadow: 0 0 10px #ff3399;
+        }
+        .vendido {
+            background-color: #ff0055 !important;
+            color: #fff !important;
+            border-color: #80002a !important;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>✦ RIFA INTERACTIVA ✦</h1>
+    <p>Selecciona un número disponible para reservar.</p>
+    
+    <div id="grid"></div>
+
+    <script>
+        const API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI'; // ¡Pega tu URL aquí!
+        const totalNumeros = 400;
+        const grid = document.getElementById('grid');
+
+        // Cargar números vendidos al entrar
+        async function cargarDatos() {
+            try {
+                const response = await fetch(API_URL);
+                const vendidos = await response.json();
+                generarGrilla(vendidos.map(v => v.numero));
+            } catch (error) {
+                console.error('Error cargando datos', error);
+                generarGrilla([]); // Genera grilla vacía si hay error
+            }
+        }
+
+        // Generar los 400 botones
+        function generarGrilla(numerosVendidos) {
+            grid.innerHTML = '';
+            for (let i = 1; i <= totalNumeros; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'numero';
+                btn.textContent = i;
+                
+                if (numerosVendidos.includes(i)) {
+                    btn.classList.add('vendido');
+                } else {
+                    btn.onclick = () => comprarNumero(i, btn);
+                }
+                grid.appendChild(btn);
+            }
+        }
+
+        // Acción al hacer clic en un número
+        async function comprarNumero(num, btnElement) {
+            const nombre = prompt(`Has seleccionado el número ${num}. Ingresa el nombre para la reserva:`);
+            
+            if (nombre && nombre.trim() !== "") {
+                // Marcar visualmente de inmediato
+                btnElement.classList.add('vendido');
+                btnElement.onclick = null;
+
+                // Enviar a Google Sheets
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ numero: num, nombre: nombre })
+                });
+                alert(`¡Número ${num} reservado para ${nombre}!`);
+            }
+        }
+
+        // Iniciar
+        cargarDatos();
+    </script>
+</body>
+</html>
