@@ -3,51 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venta de Rifa</title>
+    <title>Números de Rifa</title>
     <style>
-
         body {
-            background-color: #f4f6f8;
-            color: #333333;
+            background-color: #f4f6f8; color: #333333;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            margin: 0;
+            text-align: center; padding: 20px; margin: 0; padding-bottom: 80px;
         }
-        h1 { 
-            color: #2c3e50; 
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
+        h1 { color: #2c3e50; font-weight: 600; margin-bottom: 5px; }
         p { color: #7f8c8d; margin-bottom: 30px; }
         
         #grid {
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
-            gap: 8px; 
-            max-width: 900px; 
-            margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+            gap: 8px; max-width: 900px; margin: 0 auto;
+        }
+        
+        .numero {
+            background-color: #ffffff; border: 1px solid #dfe6e9; color: #2c3e50;
+            padding: 12px 0; cursor: pointer; border-radius: 6px; font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;
+        }
+        .numero:hover { 
+            background-color: #ecf0f1; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
 
-        .numero {
-            background-color: #ffffff; 
-            border: 1px solid #dfe6e9; 
-            color: #2c3e50;
-            padding: 12px 0; 
-            cursor: pointer; 
-            border-radius: 6px; 
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            transition: all 0.2s ease;
+        .seleccionado {
+            background-color: #3498db !important; color: white !important; border-color: #2980b9 !important;
+            transform: translateY(-2px); box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
         }
-        .numero:hover { 
-            background-color: #34495e; 
-            color: #ffffff; 
-            border-color: #34495e;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+
+        #btnFlotante {
+            display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background-color: #2ecc71; color: white; padding: 15px 30px; border-radius: 50px;
+            font-size: 1.1em; font-weight: bold; border: none; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4); z-index: 900; transition: background-color 0.2s;
         }
+        #btnFlotante:hover { background-color: #27ae60; }
 
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -55,63 +48,38 @@
             backdrop-filter: blur(3px);
         }
         .modal-content {
-            background-color: #ffffff; 
-            padding: 30px;
-            border-radius: 10px; 
-            width: 90%; 
-            max-width: 400px; 
-            text-align: left;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background-color: #ffffff; padding: 30px; border-radius: 10px; width: 90%; 
+            max-width: 400px; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-height: 90vh; overflow-y: auto;
         }
-        .modal-content h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f6f8; padding-bottom: 10px;}
+        .modal-content h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f6f8; padding-bottom: 10px; font-size: 1.3em;}
         
-     
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            font-size: 0.9em;
-            font-weight: 600;
-            color: #7f8c8d;
-        }
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        .form-group label { font-size: 0.9em; font-weight: 600; color: #7f8c8d; }
         .form-group input, .form-group select {
-            padding: 12px; 
-            border: 1px solid #bdc3c7; 
-            border-radius: 6px; 
-            font-family: inherit;
-            font-size: 1em;
-            transition: border-color 0.2s;
+            padding: 12px; border: 1px solid #bdc3c7; border-radius: 6px; font-family: inherit; font-size: 1em;
         }
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-        
-
         .botones-modal { display: flex; justify-content: space-between; gap: 10px; margin-top: 25px; }
         .botones-modal button {
-            flex: 1; padding: 12px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold;
-            font-size: 1em; transition: background-color 0.2s;
+            flex: 1; padding: 12px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; font-size: 1em;
         }
         #btnGuardar { background-color: #3498db; color: white; }
-        #btnGuardar:hover { background-color: #2980b9; }
         #btnCancelar { background-color: #ecf0f1; color: #7f8c8d; }
-        #btnCancelar:hover { background-color: #bdc3c7; color: #2c3e50; }
     </style>
 </head>
 <body>
 
     <h1>Gestión de Rifa</h1>
-    <p>Seleccione un número de la lista para registrar.</p>
+    <p>Toca uno o varios números para seleccionarlos.</p>
     
     <div id="grid"></div>
 
+
+    <button id="btnFlotante" onclick="abrirModal()">Reservar X números</button>
+
     <div id="modal" class="modal">
         <div class="modal-content">
-            <h2>Reserva - Número <span id="numeroElegido"></span></h2>
+            <h2>Reservando: <span id="numerosElegidos"></span></h2>
             
             <div class="form-group">
                 <label for="inputNombre">Nombre del comprador</label>
@@ -182,14 +150,16 @@
     </div>
 
     <script>
-  
+
         const API_URL = 'https://script.google.com/macros/s/AKfycbw_JSEGUUj4BYUDbwCe5X-isLQH2PpBgn2tQAn5SIDbB7fSNadhcOOzkr5B2D68Umu4lg/exec'; 
         
         const totalNumeros = 400;
         const grid = document.getElementById('grid');
         
-        let numeroActual = null;
-        let botonActual = null;
+
+        let seleccionados = [];
+
+        let botonesSeleccionados = {};
 
         async function cargarDatos() {
             try {
@@ -205,7 +175,6 @@
         function generarGrilla(numerosVendidos) {
             grid.innerHTML = '';
             for (let i = 1; i <= totalNumeros; i++) {
-       
                 if (numerosVendidos.includes(i) || numerosVendidos.includes(i.toString())) {
                     continue; 
                 }
@@ -213,20 +182,44 @@
                 const btn = document.createElement('div');
                 btn.className = 'numero';
                 btn.textContent = i;
-                btn.onclick = () => abrirModal(i, btn);
+                btn.onclick = () => toggleSeleccion(i, btn);
                 grid.appendChild(btn);
             }
         }
 
-        function abrirModal(num, btnElement) {
-            numeroActual = num;
-            botonActual = btnElement;
-            document.getElementById('numeroElegido').innerText = num;
+      
+        function toggleSeleccion(num, btnElement) {
+            const index = seleccionados.indexOf(num);
             
-            document.getElementById('inputNombre').value = '';
-            document.getElementById('inputContacto').value = '';
-            document.getElementById('inputVendedor').value = '';
+            if (index === -1) {
+          
+                seleccionados.push(num);
+                botonesSeleccionados[num] = btnElement;
+                btnElement.classList.add('seleccionado');
+            } else {
+        
+                seleccionados.splice(index, 1);
+                delete botonesSeleccionados[num];
+                btnElement.classList.remove('seleccionado');
+            }
             
+            actualizarBotonFlotante();
+        }
+
+        function actualizarBotonFlotante() {
+            const btnFlotante = document.getElementById('btnFlotante');
+            if (seleccionados.length > 0) {
+                btnFlotante.style.display = 'block';
+                btnFlotante.innerText = `Reservar ${seleccionados.length} número${seleccionados.length > 1 ? 's' : ''}`;
+            } else {
+                btnFlotante.style.display = 'none';
+            }
+        }
+
+        function abrirModal() {
+          
+            seleccionados.sort((a, b) => a - b);
+            document.getElementById('numerosElegidos').innerText = seleccionados.join(', ');
             document.getElementById('modal').style.display = 'flex';
         }
 
@@ -244,33 +237,48 @@
                 return;
             }
 
-
             const btnGuardar = document.getElementById('btnGuardar');
             btnGuardar.textContent = "Guardando...";
             btnGuardar.disabled = true;
 
             try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ 
-                        numero: numeroActual, 
-                        nombre: nombre,
-                        contacto: contacto,
-                        vendedor: vendedor
-                    })
-                });
+            
+                for (let num of seleccionados) {
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ 
+                            numero: num, 
+                            nombre: nombre,
+                            contacto: contacto,
+                            vendedor: vendedor
+                        })
+                    });
+                    
+           
+                    if(botonesSeleccionados[num]) {
+                        botonesSeleccionados[num].style.display = 'none';
+                    }
+                }
                 
-                // Ocultar el número de la pantalla y cerrar
-                botonActual.style.display = 'none';
                 cerrarModal();
-                alert(`Reserva confirmada. El número ${numeroActual} ha sido asignado a ${nombre}.`);
+                alert(`¡Éxito! ${seleccionados.length} números han sido asignados a ${nombre}.`);
+                
+
+                seleccionados = [];
+                botonesSeleccionados = {};
+                actualizarBotonFlotante();
+                
+         
+                document.getElementById('inputNombre').value = '';
+                document.getElementById('inputContacto').value = '';
+                document.getElementById('inputVendedor').value = '';
                 
             } catch (error) {
                 console.error("Error:", error);
-                alert("Ocurrió un error de conexión, inténtelo de nuevo.");
+                alert("Hubo un problema guardando. Por favor revisa tu conexión.");
             } finally {
-                // Restaurar el botón a su estado normal
                 btnGuardar.textContent = "Guardar Datos";
                 btnGuardar.disabled = false;
             }
