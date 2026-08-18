@@ -54,7 +54,7 @@
     <div id="grid"></div>
 
     <script>
-        const API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI'; // ¡Pega tu URL aquí!
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyrttN4IQl9U6xNToZoZjqYbNcVP98LsffVCOH8xKt3FH5518w39mvoWlYPInDmKWeGcw/exec';
         const totalNumeros = 400;
         const grid = document.getElementById('grid');
 
