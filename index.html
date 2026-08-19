@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Números de Rifa</title>
+    <title>Venta de Rifa</title>
     <style>
         body {
             background-color: #f4f6f8; color: #333333;
@@ -11,8 +11,21 @@
             text-align: center; padding: 20px; margin: 0; padding-bottom: 80px;
         }
         h1 { color: #2c3e50; font-weight: 600; margin-bottom: 5px; }
-        p { color: #7f8c8d; margin-bottom: 30px; }
+        p { color: #7f8c8d; margin-bottom: 20px; }
         
+        /* DISEÑO DEL BUSCADOR */
+        .search-container {
+            max-width: 400px; margin: 0 auto 20px auto;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        #inputBuscar {
+            padding: 12px 20px; border: 2px solid #bdc3c7; border-radius: 25px;
+            font-size: 1.1em; text-align: center; outline: none; transition: border-color 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        #inputBuscar:focus { border-color: #3498db; }
+        #mensajeBusqueda { min-height: 24px; font-size: 0.95em; }
+
         #grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
             gap: 8px; max-width: 900px; margin: 0 auto;
@@ -27,12 +40,10 @@
             background-color: #ecf0f1; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
-
         .seleccionado {
             background-color: #3498db !important; color: white !important; border-color: #2980b9 !important;
             transform: translateY(-2px); box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
         }
-
 
         #btnFlotante {
             display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -72,8 +83,13 @@
     <h1>Gestión de Rifa</h1>
     <p>Toca uno o varios números para seleccionarlos.</p>
     
+    <!-- NUEVO BUSCADOR -->
+    <div class="search-container">
+        <input type="number" id="inputBuscar" placeholder="🔍 Buscar un número..." onkeyup="buscarNumero()" oninput="buscarNumero()">
+        <div id="mensajeBusqueda"></div>
+    </div>
+    
     <div id="grid"></div>
-
 
     <button id="btnFlotante" onclick="abrirModal()">Reservar X números</button>
 
@@ -95,7 +111,7 @@
                 <label for="inputVendedor">Vendedor a cargo</label>
                 <select id="inputVendedor" required>
                     <option value="" disabled selected>Seleccione quién realizó la venta</option>
-                    <option value="Naia Greenhill">Naia Greenhill</option>
+                    <option value="Aia Greenhill">Aia Greenhill</option>
                     <option value="Aline Hernández">Aline Hernández</option>
                     <option value="Amanda Bizama">Amanda Bizama</option>
                     <option value="Aylen Catrileo">Aylen Catrileo</option>
@@ -151,31 +167,33 @@
 
     <script>
 
-        const API_URL = 'https://script.google.com/macros/s/AKfycbw_JSEGUUj4BYUDbwCe5X-isLQH2PpBgn2tQAn5SIDbB7fSNadhcOOzkr5B2D68Umu4lg/exec'; 
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw_JSEGUUj4BYUDbwCe5X-isLQH2PpBgn2tQAn5SIDbB7fSNadhcOOzkr5B2D68Umu4lg/exec';
         
-        const totalNumeros = 400;
+        const totalNumeros = 430; // 
         const grid = document.getElementById('grid');
         
-
         let seleccionados = [];
-
         let botonesSeleccionados = {};
+        let numerosVendidosGlobal = []; 
 
         async function cargarDatos() {
             try {
                 const response = await fetch(API_URL);
                 const vendidos = await response.json();
-                generarGrilla(vendidos.map(v => v.numero));
+                
+        
+                numerosVendidosGlobal = vendidos.map(v => parseInt(v.numero));
+                generarGrilla();
             } catch (error) {
                 console.error('Error cargando datos', error);
-                generarGrilla([]); 
+                generarGrilla(); 
             }
         }
 
-        function generarGrilla(numerosVendidos) {
+        function generarGrilla() {
             grid.innerHTML = '';
             for (let i = 1; i <= totalNumeros; i++) {
-                if (numerosVendidos.includes(i) || numerosVendidos.includes(i.toString())) {
+                if (numerosVendidosGlobal.includes(i)) {
                     continue; 
                 }
                 
@@ -185,19 +203,52 @@
                 btn.onclick = () => toggleSeleccion(i, btn);
                 grid.appendChild(btn);
             }
+            buscarNumero(); // Por si hay texto en el buscador al recargar
         }
 
-      
+   
+        function buscarNumero() {
+            const inputTxt = document.getElementById('inputBuscar').value;
+            const mensaje = document.getElementById('mensajeBusqueda');
+            const botones = document.querySelectorAll('.numero');
+            
+            // Convertir a número para verificar si está vendido o fuera de rango
+            const numBuscado = parseInt(inputTxt);
+
+            if (!inputTxt) {
+                // Si el buscador está vacío, mostramos todos los disponibles
+                botones.forEach(btn => btn.style.display = 'block');
+                mensaje.innerHTML = '';
+                return;
+            }
+
+            // Validaciones para el mensaje
+            if (numBuscado > totalNumeros || numBuscado < 1) {
+                mensaje.innerHTML = `<span style="color: #e67e22; font-weight: bold;">⚠️ Rango válido: 1 a ${totalNumeros}</span>`;
+            } else if (numerosVendidosGlobal.includes(numBuscado)) {
+                mensaje.innerHTML = `<span style="color: #e74c3c; font-weight: bold;">🔴 El número ${numBuscado} ya está vendido</span>`;
+            } else {
+                mensaje.innerHTML = ''; // Está disponible
+            }
+
+
+            botones.forEach(btn => {
+                if (btn.textContent.includes(inputTxt)) {
+                    btn.style.display = 'block';
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+        }
+
         function toggleSeleccion(num, btnElement) {
             const index = seleccionados.indexOf(num);
             
             if (index === -1) {
-          
                 seleccionados.push(num);
                 botonesSeleccionados[num] = btnElement;
                 btnElement.classList.add('seleccionado');
             } else {
-        
                 seleccionados.splice(index, 1);
                 delete botonesSeleccionados[num];
                 btnElement.classList.remove('seleccionado');
@@ -217,7 +268,6 @@
         }
 
         function abrirModal() {
-          
             seleccionados.sort((a, b) => a - b);
             document.getElementById('numerosElegidos').innerText = seleccionados.join(', ');
             document.getElementById('modal').style.display = 'flex';
@@ -242,7 +292,6 @@
             btnGuardar.disabled = true;
 
             try {
-            
                 for (let num of seleccionados) {
                     await fetch(API_URL, {
                         method: 'POST',
@@ -256,24 +305,26 @@
                         })
                     });
                     
-           
                     if(botonesSeleccionados[num]) {
                         botonesSeleccionados[num].style.display = 'none';
                     }
+          
+                    numerosVendidosGlobal.push(num);
                 }
                 
                 cerrarModal();
                 alert(`¡Éxito! ${seleccionados.length} números han sido asignados a ${nombre}.`);
                 
-
                 seleccionados = [];
                 botonesSeleccionados = {};
                 actualizarBotonFlotante();
                 
-         
                 document.getElementById('inputNombre').value = '';
                 document.getElementById('inputContacto').value = '';
                 document.getElementById('inputVendedor').value = '';
+            
+                document.getElementById('inputBuscar').value = '';
+                buscarNumero();
                 
             } catch (error) {
                 console.error("Error:", error);
